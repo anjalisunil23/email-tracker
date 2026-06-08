@@ -9,38 +9,129 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppSendEmailRouteImport } from './routes/_app.send-email'
+import { Route as AppEmailHistoryRouteImport } from './routes/_app.email-history'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
+import { Route as AppEmailHistoryIdRouteImport } from './routes/_app.email-history.$id'
 
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSendEmailRoute = AppSendEmailRouteImport.update({
+  id: '/send-email',
+  path: '/send-email',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEmailHistoryRoute = AppEmailHistoryRouteImport.update({
+  id: '/email-history',
+  path: '/email-history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEmailHistoryIdRoute = AppEmailHistoryIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppEmailHistoryRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/email-history': typeof AppEmailHistoryRouteWithChildren
+  '/send-email': typeof AppSendEmailRoute
+  '/settings': typeof AppSettingsRoute
+  '/email-history/$id': typeof AppEmailHistoryIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/email-history': typeof AppEmailHistoryRouteWithChildren
+  '/send-email': typeof AppSendEmailRoute
+  '/settings': typeof AppSettingsRoute
+  '/email-history/$id': typeof AppEmailHistoryIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/email-history': typeof AppEmailHistoryRouteWithChildren
+  '/_app/send-email': typeof AppSendEmailRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/email-history/$id': typeof AppEmailHistoryIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/analytics'
+    | '/dashboard'
+    | '/email-history'
+    | '/send-email'
+    | '/settings'
+    | '/email-history/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/analytics'
+    | '/dashboard'
+    | '/email-history'
+    | '/send-email'
+    | '/settings'
+    | '/email-history/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/analytics'
+    | '/_app/dashboard'
+    | '/_app/email-history'
+    | '/_app/send-email'
+    | '/_app/settings'
+    | '/_app/email-history/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +139,85 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/send-email': {
+      id: '/_app/send-email'
+      path: '/send-email'
+      fullPath: '/send-email'
+      preLoaderRoute: typeof AppSendEmailRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/email-history': {
+      id: '/_app/email-history'
+      path: '/email-history'
+      fullPath: '/email-history'
+      preLoaderRoute: typeof AppEmailHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/email-history/$id': {
+      id: '/_app/email-history/$id'
+      path: '/$id'
+      fullPath: '/email-history/$id'
+      preLoaderRoute: typeof AppEmailHistoryIdRouteImport
+      parentRoute: typeof AppEmailHistoryRoute
+    }
   }
 }
 
+interface AppEmailHistoryRouteChildren {
+  AppEmailHistoryIdRoute: typeof AppEmailHistoryIdRoute
+}
+
+const AppEmailHistoryRouteChildren: AppEmailHistoryRouteChildren = {
+  AppEmailHistoryIdRoute: AppEmailHistoryIdRoute,
+}
+
+const AppEmailHistoryRouteWithChildren = AppEmailHistoryRoute._addFileChildren(
+  AppEmailHistoryRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppEmailHistoryRoute: typeof AppEmailHistoryRouteWithChildren
+  AppSendEmailRoute: typeof AppSendEmailRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAnalyticsRoute: AppAnalyticsRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppEmailHistoryRoute: AppEmailHistoryRouteWithChildren,
+  AppSendEmailRoute: AppSendEmailRoute,
+  AppSettingsRoute: AppSettingsRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
