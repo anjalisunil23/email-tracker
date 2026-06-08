@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppSendEmailRouteImport } from './routes/_app.send-email'
 import { Route as AppEmailHistoryRouteImport } from './routes/_app.email-history'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
@@ -25,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSendEmailRoute = AppSendEmailRouteImport.update({
   id: '/send-email',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/email-history': typeof AppEmailHistoryRouteWithChildren
   '/send-email': typeof AppSendEmailRoute
+  '/settings': typeof AppSettingsRoute
   '/email-history/$id': typeof AppEmailHistoryIdRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/email-history': typeof AppEmailHistoryRouteWithChildren
   '/send-email': typeof AppSendEmailRoute
+  '/settings': typeof AppSettingsRoute
   '/email-history/$id': typeof AppEmailHistoryIdRoute
 }
 export interface FileRoutesById {
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/email-history': typeof AppEmailHistoryRouteWithChildren
   '/_app/send-email': typeof AppSendEmailRoute
+  '/_app/settings': typeof AppSettingsRoute
   '/_app/email-history/$id': typeof AppEmailHistoryIdRoute
 }
 export interface FileRouteTypes {
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/email-history'
     | '/send-email'
+    | '/settings'
     | '/email-history/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/email-history'
     | '/send-email'
+    | '/settings'
     | '/email-history/$id'
   id:
     | '__root__'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/email-history'
     | '/_app/send-email'
+    | '/_app/settings'
     | '/_app/email-history/$id'
   fileRoutesById: FileRoutesById
 }
@@ -126,6 +138,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/send-email': {
       id: '/_app/send-email'
@@ -182,6 +201,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppEmailHistoryRoute: typeof AppEmailHistoryRouteWithChildren
   AppSendEmailRoute: typeof AppSendEmailRoute
+  AppSettingsRoute: typeof AppSettingsRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -189,6 +209,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppEmailHistoryRoute: AppEmailHistoryRouteWithChildren,
   AppSendEmailRoute: AppSendEmailRoute,
+  AppSettingsRoute: AppSettingsRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
