@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   Eye,
@@ -14,7 +15,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
-import { getEmail, trackingTimeline, formatDate } from "@/lib/sample-data";
+import { getEmailAnalytics } from "@/services/analyticsService";
+import { formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_app/email-history/$id")({
   head: () => ({ meta: [{ title: "Email Details — MailTrack" }] }),
@@ -39,18 +41,29 @@ const deviceIcon = (d: string) =>
 function EmailDetailsPage() {
   const { id } = Route.useParams();
   const router = useRouter();
-  const email = getEmail(id);
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!email) return <NotFound />;
+  useEffect(() => {
+    getEmailAnalytics(id)
+      .then((res) => setData(res.data))
+      .catch((err) => {
+        if (err.response?.status === 404) setNotFound(true);
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  const opens = trackingTimeline.filter((t) => t.type === "open");
-  const clicks = trackingTimeline.filter((t) => t.type === "click");
+  if (loading) return <p className="text-sm text-muted-foreground">Loading email details...</p>;
+  if (notFound || !data) return <NotFound />;
+
+  const { email, openHistory, clickHistory, uniqueDevices, uniqueLocations } = data;
 
   const summary = [
     { label: "Opens", value: email.opens, icon: Eye },
     { label: "Clicks", value: email.clicks, icon: MousePointerClick },
-    { label: "Devices", value: 3, icon: Monitor },
-    { label: "Locations", value: 2, icon: Globe },
+    { label: "Devices", value: uniqueDevices, icon: Monitor },
+    { label: "Locations", value: uniqueLocations, icon: Globe },
   ];
 
   return (
@@ -64,7 +77,7 @@ function EmailDetailsPage() {
         <ArrowLeft className="h-4 w-4" /> Back
       </Button>
 
-      <PageHeader title="Email Details" description={`Tracking report for ${email.id}`} />
+      <PageHeader title="Email Details" description={`Tracking report for ${email.subject}`} />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {summary.map((s) => (
@@ -114,14 +127,14 @@ function EmailDetailsPage() {
             <h3 className="flex items-center gap-2 font-semibold text-foreground">
               <Eye className="h-4 w-4 text-chart-2" /> Open Tracking Timeline
             </h3>
-            <Timeline events={opens} accent="text-chart-2" />
+            <Timeline events={openHistory} accent="text-chart-2" />
           </Card>
 
           <Card className="rounded-2xl p-6 shadow-card">
             <h3 className="flex items-center gap-2 font-semibold text-foreground">
               <MousePointerClick className="h-4 w-4 text-success" /> Click Tracking Timeline
             </h3>
-            <Timeline events={clicks} accent="text-success" />
+            <Timeline events={clickHistory} accent="text-success" />
           </Card>
         </div>
       </div>
@@ -133,7 +146,7 @@ function Timeline({
   events,
   accent,
 }: {
-  events: typeof trackingTimeline;
+  events: Array<{ id: string; label: string; time: string; location: string; device: string; browser: string }>;
   accent: string;
 }) {
   if (events.length === 0) {

@@ -1,4 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { clearToken } from "@/lib/auth";
 import {
   LayoutDashboard,
   Send,
@@ -39,14 +40,16 @@ export function AppSidebar() {
   const isActive = (url: string) => pathname === url || pathname.startsWith(url + "/");
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar className="border-r bg-card">
       <SidebarHeader className="p-4">
         <Link to="/dashboard" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground shadow-elevated">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Mail className="h-5 w-5" />
           </div>
           {!collapsed && (
-            <span className="text-lg font-bold tracking-tight text-foreground">MailTrack</span>
+            <span className="text-lg font-semibold tracking-tight text-foreground">
+              Mail-Tracker
+            </span>
           )}
         </Link>
       </SidebarHeader>
@@ -58,7 +61,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                  <SidebarMenuButton
+                      asChild
+                      isActive={isActive(item.url)}
+                      className="justify-start"
+                    >
                     <Link to={item.url} className="flex items-center gap-3">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
@@ -76,7 +83,10 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Logout"
-              onClick={() => navigate({ to: "/" })}
+              onClick={() => {
+                clearToken();
+                navigate({ to: "/" });
+              }}
               className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
               <LogOut className="h-4 w-4" />

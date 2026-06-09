@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppTemplatesRouteImport } from './routes/_app.templates'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppSendEmailRouteImport } from './routes/_app.send-email'
 import { Route as AppEmailHistoryRouteImport } from './routes/_app.email-history'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppContactsRouteImport } from './routes/_app.contacts'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 import { Route as AppEmailHistoryIdRouteImport } from './routes/_app.email-history.$id'
 
@@ -26,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppTemplatesRoute = AppTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
@@ -47,6 +54,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppContactsRoute = AppContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -61,19 +73,23 @@ const AppEmailHistoryIdRoute = AppEmailHistoryIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AppAnalyticsRoute
+  '/contacts': typeof AppContactsRoute
   '/dashboard': typeof AppDashboardRoute
   '/email-history': typeof AppEmailHistoryRouteWithChildren
   '/send-email': typeof AppSendEmailRoute
   '/settings': typeof AppSettingsRoute
+  '/templates': typeof AppTemplatesRoute
   '/email-history/$id': typeof AppEmailHistoryIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AppAnalyticsRoute
+  '/contacts': typeof AppContactsRoute
   '/dashboard': typeof AppDashboardRoute
   '/email-history': typeof AppEmailHistoryRouteWithChildren
   '/send-email': typeof AppSendEmailRoute
   '/settings': typeof AppSettingsRoute
+  '/templates': typeof AppTemplatesRoute
   '/email-history/$id': typeof AppEmailHistoryIdRoute
 }
 export interface FileRoutesById {
@@ -81,10 +97,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/contacts': typeof AppContactsRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/email-history': typeof AppEmailHistoryRouteWithChildren
   '/_app/send-email': typeof AppSendEmailRoute
   '/_app/settings': typeof AppSettingsRoute
+  '/_app/templates': typeof AppTemplatesRoute
   '/_app/email-history/$id': typeof AppEmailHistoryIdRoute
 }
 export interface FileRouteTypes {
@@ -92,29 +110,35 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/analytics'
+    | '/contacts'
     | '/dashboard'
     | '/email-history'
     | '/send-email'
     | '/settings'
+    | '/templates'
     | '/email-history/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/analytics'
+    | '/contacts'
     | '/dashboard'
     | '/email-history'
     | '/send-email'
     | '/settings'
+    | '/templates'
     | '/email-history/$id'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_app/analytics'
+    | '/_app/contacts'
     | '/_app/dashboard'
     | '/_app/email-history'
     | '/_app/send-email'
     | '/_app/settings'
+    | '/_app/templates'
     | '/_app/email-history/$id'
   fileRoutesById: FileRoutesById
 }
@@ -138,6 +162,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/templates': {
+      id: '/_app/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof AppTemplatesRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/settings': {
       id: '/_app/settings'
@@ -165,6 +196,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/contacts': {
+      id: '/_app/contacts'
+      path: '/contacts'
+      fullPath: '/contacts'
+      preLoaderRoute: typeof AppContactsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/analytics': {
@@ -198,18 +236,22 @@ const AppEmailHistoryRouteWithChildren = AppEmailHistoryRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppContactsRoute: typeof AppContactsRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppEmailHistoryRoute: typeof AppEmailHistoryRouteWithChildren
   AppSendEmailRoute: typeof AppSendEmailRoute
   AppSettingsRoute: typeof AppSettingsRoute
+  AppTemplatesRoute: typeof AppTemplatesRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAnalyticsRoute: AppAnalyticsRoute,
+  AppContactsRoute: AppContactsRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppEmailHistoryRoute: AppEmailHistoryRouteWithChildren,
   AppSendEmailRoute: AppSendEmailRoute,
   AppSettingsRoute: AppSettingsRoute,
+  AppTemplatesRoute: AppTemplatesRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -221,3 +263,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

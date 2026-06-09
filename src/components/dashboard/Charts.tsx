@@ -14,7 +14,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { opensChartData, trendData, deviceData } from "@/lib/sample-data";
 
 const axisStyle = { fontSize: 12, fill: "var(--color-muted-foreground)" };
 
@@ -27,10 +26,29 @@ const tooltipStyle = {
   fontSize: 13,
 };
 
-export function OpensBarChart() {
+const emptyWeek = [
+  { name: "Mon", opens: 0, clicks: 0 },
+  { name: "Tue", opens: 0, clicks: 0 },
+  { name: "Wed", opens: 0, clicks: 0 },
+  { name: "Thu", opens: 0, clicks: 0 },
+  { name: "Fri", opens: 0, clicks: 0 },
+  { name: "Sat", opens: 0, clicks: 0 },
+  { name: "Sun", opens: 0, clicks: 0 },
+];
+
+const defaultDevices = [
+  { name: "Desktop", value: 0, color: "var(--color-chart-1)" },
+  { name: "Mobile", value: 0, color: "var(--color-chart-2)" },
+  { name: "Tablet", value: 0, color: "var(--color-chart-3)" },
+];
+
+type ChartPoint = { name: string; opens?: number; clicks?: number; openRate?: number; clickRate?: number };
+type DevicePoint = { name: string; value: number; color: string };
+
+export function OpensBarChart({ data = emptyWeek }: { data?: ChartPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={opensChartData} barGap={6}>
+      <BarChart data={data} barGap={6}>
         <defs>
           <linearGradient id="opensGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--color-chart-1)" stopOpacity={0.95} />
@@ -47,10 +65,10 @@ export function OpensBarChart() {
   );
 }
 
-export function ClicksLineChart() {
+export function ClicksLineChart({ data = emptyWeek }: { data?: ChartPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={opensChartData}>
+      <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
         <XAxis dataKey="name" tickLine={false} axisLine={false} tick={axisStyle} />
         <YAxis tickLine={false} axisLine={false} tick={axisStyle} width={32} />
@@ -68,7 +86,13 @@ export function ClicksLineChart() {
   );
 }
 
-export function TrendAreaChart() {
+export function TrendAreaChart({ data = emptyWeek }: { data?: ChartPoint[] }) {
+  const trendData = data.map((d) => ({
+    name: d.name,
+    openRate: d.opens ?? 0,
+    clickRate: d.clicks ?? 0,
+  }));
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart data={trendData}>
@@ -84,35 +108,23 @@ export function TrendAreaChart() {
         </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
         <XAxis dataKey="name" tickLine={false} axisLine={false} tick={axisStyle} />
-        <YAxis tickLine={false} axisLine={false} tick={axisStyle} width={32} unit="%" />
+        <YAxis tickLine={false} axisLine={false} tick={axisStyle} width={32} />
         <Tooltip contentStyle={tooltipStyle} />
-        <Area
-          type="monotone"
-          dataKey="openRate"
-          stroke="var(--color-chart-1)"
-          strokeWidth={2.5}
-          fill="url(#openArea)"
-          name="Open rate"
-        />
-        <Area
-          type="monotone"
-          dataKey="clickRate"
-          stroke="var(--color-chart-3)"
-          strokeWidth={2.5}
-          fill="url(#clickArea)"
-          name="Click rate"
-        />
+        <Area type="monotone" dataKey="openRate" stroke="var(--color-chart-1)" strokeWidth={2.5} fill="url(#openArea)" name="Opens" />
+        <Area type="monotone" dataKey="clickRate" stroke="var(--color-chart-3)" strokeWidth={2.5} fill="url(#clickArea)" name="Clicks" />
       </AreaChart>
     </ResponsiveContainer>
   );
 }
 
-export function DevicePieChart() {
+export function DevicePieChart({ data = defaultDevices }: { data?: DevicePoint[] }) {
+  const chartData = data.some((d) => d.value > 0) ? data : defaultDevices;
+
   return (
     <ResponsiveContainer width="100%" height={260}>
       <PieChart>
         <Pie
-          data={deviceData}
+          data={chartData}
           dataKey="value"
           nameKey="name"
           cx="50%"
@@ -122,7 +134,7 @@ export function DevicePieChart() {
           paddingAngle={4}
           stroke="none"
         >
-          {deviceData.map((d) => (
+          {chartData.map((d) => (
             <Cell key={d.name} fill={d.color} />
           ))}
         </Pie>

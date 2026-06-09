@@ -1,13 +1,21 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, BarChart3, MousePointerClick, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import loginIllustration from "@/assets/login-illustration.jpg";
+import { login } from "@/services/authService";
+import { isAuthenticated, setToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: () => {
+    if (isAuthenticated()) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Sign In — MailTrack" },
@@ -28,21 +36,34 @@ const features = [
 function LoginPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({ to: "/dashboard" });
+    setLoading(true);
+    try {
+      const email = (e.target as any).email.value;
+      const password = (e.target as any).password.value;
+      const res = await login({ email, password });
+      setToken(res.data.token);
+      toast.success("Welcome back!");
+      navigate({ to: "/dashboard" });
+    } catch {
+      toast.error("Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Illustration side */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-primary p-12 text-primary-foreground lg:flex">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-primary p-12 text-primary-foreground lg:flex">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20">
             <Mail className="h-5 w-5" />
           </div>
-          <span className="text-xl font-bold tracking-tight">MailTrack</span>
+          <span className="text-xl font-semibold tracking-tight">Mail-Tracker</span>
         </div>
 
         <div className="relative z-10">
@@ -79,10 +100,10 @@ function LoginPage() {
       <div className="flex items-center justify-center bg-background px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Mail className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold tracking-tight">MailTrack</span>
+            <span className="text-xl font-semibold tracking-tight">Mail-Tracker</span>
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Welcome back</h1>
@@ -97,8 +118,9 @@ function LoginPage() {
                 <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="email"
+                  name="email"
                   type="email"
-                  defaultValue="alex@mailtrack.io"
+                  defaultValue="anjali@mailtrack.io"
                   placeholder="you@company.com"
                   className="h-11 rounded-xl pl-9"
                   required
@@ -117,6 +139,7 @@ function LoginPage() {
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   defaultValue="password"
                   placeholder="••••••••"
@@ -141,16 +164,14 @@ function LoginPage() {
               </Label>
             </div>
 
-            <Button type="submit" className="h-11 w-full rounded-xl bg-gradient-primary text-base font-semibold shadow-elevated hover:opacity-90">
-              Sign In
+            <Button type="submit" disabled={loading} className="btn-primary-gradient h-11 w-full text-base">
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link to="/dashboard" className="font-semibold text-primary hover:underline">
-              Start free trial
-            </Link>
+            <span className="text-muted-foreground">Use demo: anjali@mailtrack.io / password</span>
           </p>
         </div>
       </div>

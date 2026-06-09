@@ -18,6 +18,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { sendEmail } from "@/services/emailService";
+import { getContacts } from "@/services/contactService";
+import { getTemplates } from "@/services/templateService";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_app/send-email")({
   head: () => ({ meta: [{ title: "Send Email — MailTrack" }] }),
@@ -28,19 +33,56 @@ const toolbar = [Bold, Italic, Underline, List, Link2];
 
 function SendEmailPage() {
   const [recipient, setRecipient] = useState("");
+  const [cc, setCc] = useState("");
+  const [scheduleAt, setScheduleAt] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const navigate = useNavigate();
 
-  const handleSend = (e: React.FormEvent) => {
+  useEffect(() => {
+    getContacts().then((res) => setContacts(res.data)).catch(() => {});
+    getTemplates().then((res) => setTemplates(res.data)).catch(() => {});
+  }, []);
+
+  const handleTemplateSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const tpl = templates.find((t) => t._id === e.target.value);
+    if (tpl) {
+      setSubject(tpl.subject);
+      setMessage(tpl.content);
+    }
+  };
+
+  const handleContactSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const contact = contacts.find((c) => c._id === e.target.value);
+    if (contact) {
+      setRecipient(contact.email);
+    }
+  };
+
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!recipient || !subject) {
       toast.error("Recipient and subject are required.");
       return;
     }
-    toast.success(`Email sent to ${recipient} — tracking enabled.`);
-    setRecipient("");
-    setSubject("");
-    setMessage("");
+    try {
+      const res = await sendEmail({ recipient, cc, subject, content: message, scheduleAt: scheduleAt ? new Date(scheduleAt).toISOString() : undefined });
+      toast.success(`Email sent to ${recipient} — tracking enabled.`, {
+        description: res.data.previewUrl
+          ? `Simulate open: ${res.data.previewUrl}`
+          : undefined,
+        duration: 8000,
+      });
+      setRecipient("");
+      setSubject("");
+      setMessage("");
+      navigate({ to: "/email-history" });
+    } catch (error) {
+      toast.error("Failed to send email.");
+      console.error(error);
+    }
   };
 
   return (
@@ -52,18 +94,65 @@ function SendEmailPage() {
           <form onSubmit={handleSend} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="to">Recipient Email</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="to"
+                  type="email"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  placeholder="recipient@company.com"
+                  className="h-11 rounded-xl flex-1"
+                />
+                <select 
+                  onChange={handleContactSelect}
+                  className="h-11 rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                  defaultValue=""
+                >
+                  <option value="" disabled>Contacts...</option>
+                  {contacts.map((c) => (
+                    <option key={c._id} value={c._id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cc">CC (comma-separated)</Label>
               <Input
-                id="to"
-                type="email"
-                value={recipient}
-                onChange={(e) => setRecipient(e.target.value)}
-                placeholder="recipient@company.com"
+                id="cc"
+                type="text"
+                value={cc}
+                onChange={(e) => setCc(e.target.value)}
+                placeholder="cc1@example.com, cc2@example.com"
                 className="h-11 rounded-xl"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="subject">Subject</Label>
+              <Label htmlFor="schedule">Schedule Send</Label>
+              <Input
+                id="schedule"
+                type="datetime-local"
+                value={scheduleAt}
+                onChange={(e) => setScheduleAt(e.target.value)}
+                className="h-11 rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="subject">Subject</Label>
+                <select 
+                  onChange={handleTemplateSelect}
+                  className="rounded-xl border border-input bg-transparent px-2 py-1 text-xs shadow-sm"
+                  defaultValue=""
+                >
+                  <option value="" disabled>Load Template...</option>
+                  {templates.map((t) => (
+                    <option key={t._id} value={t._id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
               <Input
                 id="subject"
                 value={subject}
@@ -101,7 +190,7 @@ function SendEmailPage() {
                   Track opens & clicks
                 </Label>
               </div>
-              <Button type="submit" className="rounded-xl bg-gradient-primary shadow-elevated hover:opacity-90">
+              <Button type="submit" className="btn-primary-gradient">
                 <Send className="h-4 w-4" /> Send Email
               </Button>
             </div>

@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Sun, Moon, User, Lock, Bell } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Sun, Moon, User, Lock, Bell, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { getProfile } from "@/services/authService";
+import { getSettings, updateSettings } from "@/services/settingsService";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +29,38 @@ const notifications = [
 
 function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const [profile, setProfile] = useState({ name: "", email: "" });
+  const [smtpEmail, setSmtpEmail] = useState("");
+  const [smtpPassword, setSmtpPassword] = useState("");
+  const [hasSmtpPassword, setHasSmtpPassword] = useState(false);
+
+  useEffect(() => {
+    getProfile()
+      .then((res) => setProfile({ name: res.data.name, email: res.data.email }))
+      .catch(() => {});
+      
+    getSettings()
+      .then((res) => {
+        setSmtpEmail(res.data.smtpEmail);
+        setHasSmtpPassword(res.data.hasSmtpPassword);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleSaveSmtp = async () => {
+    try {
+      await updateSettings({ smtpEmail, smtpPassword });
+      toast.success("Gmail connected successfully!");
+      if (smtpPassword) setHasSmtpPassword(true);
+      setSmtpPassword(""); // clear it for security
+    } catch (e) {
+      toast.error("Failed to connect Gmail account.");
+    }
+  };
+
+  const initials = profile.name
+    ? profile.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    : "U";
 
   return (
     <div className="space-y-6">
@@ -35,23 +70,43 @@ function SettingsPage() {
         <SectionTitle icon={User} title="Profile" desc="Update your personal information." />
         <div className="mt-5 flex items-center gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarFallback className="bg-gradient-primary text-lg font-semibold text-primary-foreground">AJ</AvatarFallback>
+            <AvatarFallback className="bg-gradient-primary text-lg font-semibold text-white">{initials}</AvatarFallback>
           </Avatar>
           <Button variant="outline" className="rounded-xl">Change photo</Button>
         </div>
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="name">Full name</Label>
-            <Input id="name" defaultValue="Alex Jordan" className="h-11 rounded-xl" />
+            <Input id="name" value={profile.name} readOnly className="h-11 rounded-xl" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="pemail">Email</Label>
-            <Input id="pemail" type="email" defaultValue="alex@mailtrack.io" className="h-11 rounded-xl" />
+            <Input id="pemail" type="email" value={profile.email} readOnly className="h-11 rounded-xl" />
           </div>
         </div>
         <div className="mt-5 flex justify-end">
-          <Button onClick={() => toast.success("Profile updated")} className="rounded-xl bg-gradient-primary hover:opacity-90">
+          <Button onClick={() => toast.success("Profile updated")} className="btn-primary-gradient">
             Save changes
+          </Button>
+        </div>
+      </Card>
+
+      <Card className="rounded-2xl p-6 shadow-card">
+        <SectionTitle icon={Mail} title="Connect Gmail" desc="Send emails through your own Google account." />
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="smtpEmail">Gmail Address</Label>
+            <Input id="smtpEmail" type="email" value={smtpEmail} onChange={(e) => setSmtpEmail(e.target.value)} placeholder="your.name@gmail.com" className="h-11 rounded-xl" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="smtpPass">App Password {hasSmtpPassword && <span className="text-green-500 text-xs font-semibold">(Saved)</span>}</Label>
+            <Input id="smtpPass" type="password" value={smtpPassword} onChange={(e) => setSmtpPassword(e.target.value)} placeholder="16-character app password" className="h-11 rounded-xl" />
+            <p className="text-xs text-muted-foreground mt-1">Generate an app password in your Google Account security settings.</p>
+          </div>
+        </div>
+        <div className="mt-5 flex justify-end">
+          <Button onClick={handleSaveSmtp} className="btn-primary-gradient">
+            Connect Account
           </Button>
         </div>
       </Card>
@@ -73,7 +128,7 @@ function SettingsPage() {
           </div>
         </div>
         <div className="mt-5 flex justify-end">
-          <Button onClick={() => toast.success("Password updated")} className="rounded-xl bg-gradient-primary hover:opacity-90">
+          <Button onClick={() => toast.success("Password updated")} className="btn-primary-gradient">
             Update password
           </Button>
         </div>
