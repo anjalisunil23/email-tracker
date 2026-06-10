@@ -9,6 +9,11 @@ A modern, full-stack email tracking application that monitors email opens, link 
 ![MongoDB](https://img.shields.io/badge/MongoDB-6.0+-13AA52?style=flat-square)
 
 ---
+## 🎥 Demo
+
+> Click the thumbnail below to watch the full demo on YouTube.
+
+[![Watch Demo](https://img.youtube.com/vi/g_G6f_Ecsp4/0.jpg)](https://youtu.be/g_G6f_Ecsp4)
 
 ## 🎯 Features
 
