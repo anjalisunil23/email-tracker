@@ -1,7 +1,9 @@
 # Mail Tracker - Installation & Setup Guide
 
 ## Project Overview
+
 Mail Tracker is a full-stack email tracking application built with:
+
 - **Frontend**: React + TanStack Router + Vite + TypeScript
 - **Backend**: Express.js + MongoDB + Mongoose + TypeScript
 - **Database**: MongoDB (with in-memory option for development)
@@ -20,6 +22,7 @@ Before installation, ensure you have the following installed:
 - **Git**
 
 ### Check versions:
+
 ```bash
 node --version
 npm --version
@@ -88,16 +91,16 @@ SKIP_SMTP=true
 
 **Environment Variables Explained:**
 
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `MONGO_URI` | MongoDB connection string | mongodb://127.0.0.1:27017/mailtracker |
-| `USE_MEMORY_DB` | Use in-memory DB for development | true |
-| `JWT_SECRET` | Secret key for JWT tokens | Required |
-| `EMAIL_USER` | Gmail address for sending emails | - |
-| `EMAIL_PASS` | Gmail app-specific password | - |
-| `PORT` | Backend server port | 5000 |
-| `BACKEND_URL` | Backend URL for frontend calls | http://localhost:5000 |
-| `SKIP_SMTP` | Skip SMTP validation in dev | true |
+| Variable        | Purpose                          | Default                               |
+| --------------- | -------------------------------- | ------------------------------------- |
+| `MONGO_URI`     | MongoDB connection string        | mongodb://127.0.0.1:27017/mailtracker |
+| `USE_MEMORY_DB` | Use in-memory DB for development | true                                  |
+| `JWT_SECRET`    | Secret key for JWT tokens        | Required                              |
+| `EMAIL_USER`    | Gmail address for sending emails | -                                     |
+| `EMAIL_PASS`    | Gmail app-specific password      | -                                     |
+| `PORT`          | Backend server port              | 5000                                  |
+| `BACKEND_URL`   | Backend URL for frontend calls   | http://localhost:5000                 |
+| `SKIP_SMTP`     | Skip SMTP validation in dev      | true                                  |
 
 ---
 
@@ -106,12 +109,14 @@ SKIP_SMTP=true
 #### Option A: Local MongoDB Installation
 
 **On Windows:**
+
 1. Download MongoDB Community Edition from https://www.mongodb.com/try/download/community
 2. Run the installer
 3. MongoDB will start as a Windows service
 4. Update `.env`: `MONGO_URI=mongodb://127.0.0.1:27017/mailtracker`
 
 **On macOS (using Homebrew):**
+
 ```bash
 brew tap mongodb/brew
 brew install mongodb-community
@@ -119,6 +124,7 @@ brew services start mongodb-community
 ```
 
 **On Linux (Ubuntu/Debian):**
+
 ```bash
 sudo apt-get install -y mongodb
 sudo systemctl start mongodb
@@ -159,6 +165,7 @@ bun run dev
 ```
 
 Expected output:
+
 ```
 MongoDB connected
 Seeded demo user (anjali@mailtrack.io / password)
@@ -174,6 +181,7 @@ bun run dev
 ```
 
 Expected output:
+
 ```
 VITE v5.x.x  ready in xxx ms
 ➜  local:   http://localhost:5173/
@@ -189,10 +197,12 @@ VITE v5.x.x  ready in xxx ms
 ## Initial Login
 
 **Demo Account Credentials:**
+
 - Email: `anjali@mailtrack.io`
 - Password: `password`
 
 The demo account is automatically seeded with:
+
 - Demo user profile
 - Sample emails
 - Sample open events
@@ -203,12 +213,14 @@ The demo account is automatically seeded with:
 ## API Endpoints
 
 ### Authentication
+
 ```
 POST   /api/auth/register      - Create new account
 POST   /api/auth/login         - Login and get JWT token
 ```
 
 ### Email Management
+
 ```
 POST   /api/email/send         - Send tracked email
 GET    /api/email/list         - Get user's emails
@@ -216,12 +228,14 @@ GET    /api/email/:id          - Get email details
 ```
 
 ### Tracking
+
 ```
 POST   /api/track/open/:id     - Record email open
 POST   /api/track/click/:id    - Record link click
 ```
 
 ### Analytics
+
 ```
 GET    /api/analytics/summary  - Get analytics overview
 GET    /api/analytics/emails   - Get email analytics
@@ -267,23 +281,27 @@ zenith-mail-lab/
 ### Issue: MongoDB Connection Failed
 
 **Solution:**
+
 1. Check if MongoDB is running:
+
    ```bash
    # Windows
    Get-Service MongoDB
-   
+
    # macOS
    brew services list
-   
+
    # Linux
    sudo systemctl status mongodb
    ```
+
 2. Verify `MONGO_URI` in `.env`
 3. For in-memory DB, ensure `USE_MEMORY_DB=true`
 
 ### Issue: Port Already in Use
 
 **Backend (port 5000):**
+
 ```bash
 # Windows
 netstat -ano | findstr :5000
@@ -295,6 +313,7 @@ kill -9 <PID>
 ```
 
 **Frontend (port 5173):**
+
 ```bash
 # Windows
 netstat -ano | findstr :5173
@@ -336,12 +355,14 @@ kill -9 <PID>
 ### Backend Deployment (Node.js hosting)
 
 1. **Build TypeScript:**
+
    ```bash
    cd backend
    npm run build
    ```
 
 2. **Set Production Environment Variables:**
+
    ```env
    NODE_ENV=production
    USE_MEMORY_DB=false
@@ -357,6 +378,7 @@ kill -9 <PID>
 ### Frontend Deployment (Static hosting)
 
 1. **Build:**
+
    ```bash
    npm run build
    ```
@@ -423,6 +445,7 @@ npm run build:dev      # Build in development mode
 ## Support
 
 For issues or questions:
+
 1. Check the [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for schema details
 2. Review API endpoint documentation
 3. Check environment variable configuration

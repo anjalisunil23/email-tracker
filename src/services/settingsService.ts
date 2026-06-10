@@ -1,4 +1,16 @@
-import api from './api';
+import api from "./api";
 
-export const getSettings = () => api.get('/settings');
-export const updateSettings = (data: { smtpEmail?: string; smtpPassword?: string }) => api.post('/settings', data);
+export type NotificationPrefs = {
+  opens: boolean;
+  clicks: boolean;
+  digest: boolean;
+  product: boolean;
+};
+
+export const getSettings = () => api.get("/settings");
+
+export const updateSettings = (data: {
+  smtpEmail?: string;
+  smtpPassword?: string;
+  notificationPrefs?: Partial<NotificationPrefs>;
+}) => api.post("/settings", data);

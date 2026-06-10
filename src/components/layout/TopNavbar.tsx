@@ -24,6 +24,7 @@ export function TopNavbar() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<{ name: string; email: string } | null>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     getProfile()
@@ -35,7 +36,12 @@ export function TopNavbar() {
   }, []);
 
   const initials = profile?.name
-    ? profile.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    ? profile.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
     : "U";
 
   const handleLogout = () => {
@@ -51,9 +57,13 @@ export function TopNavbar() {
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search emails..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="h-10 w-full rounded-lg bg-muted pl-9 focus-visible:ring-primary"
           onKeyDown={(e) => {
-            if (e.key === "Enter") navigate({ to: "/email-history" });
+            if (e.key === "Enter") {
+              navigate({ to: "/email-history", search: { q: searchQuery.trim() || undefined } });
+            }
           }}
         />
       </div>
@@ -96,7 +106,9 @@ export function TopNavbar() {
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <span className="hidden text-sm font-medium md:inline">{profile?.name || "User"}</span>
+              <span className="hidden text-sm font-medium md:inline">
+                {profile?.name || "User"}
+              </span>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
@@ -105,7 +117,9 @@ export function TopNavbar() {
               <span className="text-xs font-normal text-muted-foreground">{profile?.email}</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
+              Settings
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="text-destructive">
               Logout
             </DropdownMenuItem>

@@ -1,15 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import {
-  Bold,
-  Italic,
-  Underline,
-  List,
-  Link2,
-  Send,
-  Eye,
-} from "lucide-react";
+import { Bold, Italic, Underline, List, Link2, Send, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +26,7 @@ const toolbar = [Bold, Italic, Underline, List, Link2];
 function SendEmailPage() {
   const [recipient, setRecipient] = useState("");
   const [cc, setCc] = useState("");
+  const [bcc, setBcc] = useState("");
   const [scheduleAt, setScheduleAt] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -42,8 +35,12 @@ function SendEmailPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getContacts().then((res) => setContacts(res.data)).catch(() => {});
-    getTemplates().then((res) => setTemplates(res.data)).catch(() => {});
+    getContacts()
+      .then((res) => setContacts(res.data))
+      .catch(() => {});
+    getTemplates()
+      .then((res) => setTemplates(res.data))
+      .catch(() => {});
   }, []);
 
   const handleTemplateSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -68,26 +65,47 @@ function SendEmailPage() {
       return;
     }
     try {
-      const res = await sendEmail({ recipient, cc, subject, content: message, scheduleAt: scheduleAt ? new Date(scheduleAt).toISOString() : undefined });
-      toast.success(`Email sent to ${recipient} — tracking enabled.`, {
-        description: res.data.previewUrl
-          ? `Simulate open: ${res.data.previewUrl}`
-          : undefined,
-        duration: 8000,
+      const res = await sendEmail({
+        recipient,
+        cc: cc || undefined,
+        bcc: bcc || undefined,
+        subject,
+        content: message,
+        scheduleAt: scheduleAt ? new Date(scheduleAt).toISOString() : undefined,
       });
+      const { msg, trackingLocal, smtpReal, trackingWarning, trackingUrl } = res.data;
+      toast.success(msg || `Email sent to ${recipient}`, {
+        description:
+          trackingWarning ||
+          (smtpReal
+            ? `Delivered via Gmail. Tracking URL: ${trackingUrl || "active"}`
+            : "Check Gmail settings — SMTP may not be configured."),
+        duration: 10000,
+      });
+      if (trackingLocal) {
+        toast.info("Check recipient Spam folder if email not in inbox.", { duration: 8000 });
+      }
       setRecipient("");
       setSubject("");
       setMessage("");
       navigate({ to: "/email-history" });
-    } catch (error) {
-      toast.error("Failed to send email.");
+    } catch (error: any) {
+      const apiMsg = error?.response?.data?.msg;
+      const apiError = error?.response?.data?.error;
+      toast.error(apiMsg || "Failed to send email.", {
+        description: apiError || undefined,
+        duration: 10000,
+      });
       console.error(error);
     }
   };
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Send Email" description="Compose a tracked email with open and click analytics." />
+      <PageHeader
+        title="Send Email"
+        description="Compose a tracked email with open and click analytics."
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="rounded-2xl p-6 shadow-card">
@@ -103,14 +121,18 @@ function SendEmailPage() {
                   placeholder="recipient@company.com"
                   className="h-11 rounded-xl flex-1"
                 />
-                <select 
+                <select
                   onChange={handleContactSelect}
                   className="h-11 rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
                   defaultValue=""
                 >
-                  <option value="" disabled>Contacts...</option>
+                  <option value="" disabled>
+                    Contacts...
+                  </option>
                   {contacts.map((c) => (
-                    <option key={c._id} value={c._id}>{c.name}</option>
+                    <option key={c._id} value={c._id}>
+                      {c.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -129,6 +151,18 @@ function SendEmailPage() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="bcc">BCC (comma-separated)</Label>
+              <Input
+                id="bcc"
+                type="text"
+                value={bcc}
+                onChange={(e) => setBcc(e.target.value)}
+                placeholder="bcc@example.com"
+                className="h-11 rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="schedule">Schedule Send</Label>
               <Input
                 id="schedule"
@@ -142,14 +176,18 @@ function SendEmailPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="subject">Subject</Label>
-                <select 
+                <select
                   onChange={handleTemplateSelect}
                   className="rounded-xl border border-input bg-transparent px-2 py-1 text-xs shadow-sm"
                   defaultValue=""
                 >
-                  <option value="" disabled>Load Template...</option>
+                  <option value="" disabled>
+                    Load Template...
+                  </option>
                   {templates.map((t) => (
-                    <option key={t._id} value={t._id}>{t.name}</option>
+                    <option key={t._id} value={t._id}>
+                      {t.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -212,7 +250,8 @@ function SendEmailPage() {
               </p>
             </div>
             <div className="prose prose-sm mt-4 max-w-none whitespace-pre-wrap text-sm text-foreground/90">
-              {message || "Write your message and it will appear here in real time. This is exactly how your recipient will see the email."}
+              {message ||
+                "Write your message and it will appear here in real time. This is exactly how your recipient will see the email."}
             </div>
             <div className="mt-6 flex items-center gap-2 rounded-lg bg-accent/50 p-3 text-xs text-accent-foreground">
               <Eye className="h-3.5 w-3.5" />

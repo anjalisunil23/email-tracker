@@ -8,6 +8,9 @@ import {
   Settings,
   LogOut,
   Mail,
+  Users,
+  FileText,
+  Calendar,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +30,9 @@ const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Send Email", url: "/send-email", icon: Send },
   { title: "Email History", url: "/email-history", icon: History },
+  { title: "Scheduled", url: "/scheduled", icon: Calendar },
+  { title: "Contacts", url: "/contacts", icon: Users },
+  { title: "Templates", url: "/templates", icon: FileText },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Settings", url: "/settings", icon: Settings },
 ] as const;
@@ -62,10 +68,10 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
-                      asChild
-                      isActive={isActive(item.url)}
-                      className="justify-start"
-                    >
+                    asChild
+                    isActive={isActive(item.url)}
+                    className="justify-start"
+                  >
                     <Link to={item.url} className="flex items-center gap-3">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>

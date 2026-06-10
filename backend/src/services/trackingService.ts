@@ -1,8 +1,8 @@
-import OpenEvent from '../models/OpenEvent';
-import ClickEvent from '../models/ClickEvent';
-import Email from '../models/Email';
+import OpenEvent from "../models/OpenEvent";
+import ClickEvent from "../models/ClickEvent";
+import Email from "../models/Email";
 // @ts-ignore: geoip-lite does not have type definitions
-import geoip from 'geoip-lite';
+import geoip from "geoip-lite";
 
 export async function getEmailDetails(emailId: string) {
   const [opens, clicks] = await Promise.all([
@@ -14,7 +14,9 @@ export async function getEmailDetails(emailId: string) {
     const geo = geoip.lookup(event.ipAddress || event.ip);
     return {
       ...event,
-      location: geo ? { latitude: geo.ll[0], longitude: geo.ll[1], city: geo.city, country: geo.country } : null,
+      location: geo
+        ? { latitude: geo.ll[0], longitude: geo.ll[1], city: geo.city, country: geo.country }
+        : null,
     };
   };
 

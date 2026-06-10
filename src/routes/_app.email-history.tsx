@@ -1,27 +1,45 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { getEmailAnalytics } from "@/services/analyticsService";
 import { MapPin, Search, ChevronLeft, ChevronRight, Eye, MousePointerClick } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { listEmails } from "@/services/emailService";
 import { formatDate } from "@/lib/format";
 
+type EmailHistorySearch = { q?: string };
+
 export const Route = createFileRoute("/_app/email-history")({
+  validateSearch: (search: Record<string, unknown>): EmailHistorySearch => ({
+    q: typeof search.q === "string" ? search.q : undefined,
+  }),
   head: () => ({ meta: [{ title: "Email History — MailTrack" }] }),
   component: EmailHistoryPage,
 });
 
-type EmailStatus = "opened" | "clicked" | "delivered" | "bounced";
+import type { EmailStatus } from "@/lib/types";
 
 function EmailHistoryPage() {
-  const [query, setQuery] = useState("");
+  const { q: initialQ } = Route.useSearch();
+  const [query, setQuery] = useState(initialQ || "");
   const [status, setStatus] = useState<EmailStatus | "all">("all");
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<any[]>([]);
@@ -45,7 +63,10 @@ function EmailHistoryPage() {
     }
   }, [selectedEmailId]);
 
-  // Fetch list of emails
+  useEffect(() => {
+    if (initialQ) setQuery(initialQ);
+  }, [initialQ]);
+
   useEffect(() => {
     setLoading(true);
     listEmails({
@@ -154,6 +175,8 @@ function EmailHistoryPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="pending">Scheduled</SelectItem>
+              <SelectItem value="failed">Failed</SelectItem>
               <SelectItem value="clicked">Clicked</SelectItem>
               <SelectItem value="opened">Opened</SelectItem>
               <SelectItem value="delivered">Delivered</SelectItem>
@@ -177,24 +200,43 @@ function EmailHistoryPage() {
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-muted-foreground">Loading...</td>
+                  <td colSpan={6} className="py-10 text-center text-muted-foreground">
+                    Loading...
+                  </td>
                 </tr>
               ) : rows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-muted-foreground">No emails match your filters.</td>
+                  <td colSpan={6} className="py-10 text-center text-muted-foreground">
+                    No emails match your filters.
+                  </td>
                 </tr>
               ) : (
                 rows.map((e) => (
-                  <tr key={e.id} className="group transition-colors hover:bg-muted/50" onClick={() => { setSelectedEmailId(e.id); setDetailOpen(true); }}>
+                  <tr
+                    key={e.id}
+                    className="group transition-colors hover:bg-muted/50"
+                    onClick={() => {
+                      setSelectedEmailId(e.id);
+                      setDetailOpen(true);
+                    }}
+                  >
                     <td className="px-3 py-3">
                       <Link to="/email-history/$id" params={{ id: e.id }} className="block">
-                        <span className="font-medium text-foreground group-hover:text-primary">{e.recipientName}</span>
+                        <span className="font-medium text-foreground group-hover:text-primary">
+                          {e.recipientName}
+                        </span>
                         <span className="block text-xs text-muted-foreground">{e.recipient}</span>
                       </Link>
                     </td>
-                    <td className="max-w-[220px] truncate px-3 py-3 text-muted-foreground">{e.subject}</td>
-                    <td className="whitespace-nowrap px-3 py-3 text-muted-foreground">{formatDate(e.sentDate)}</td>
-                    <td className="px-3 py-3"><StatusBadge status={e.status} /></td>
+                    <td className="max-w-[220px] truncate px-3 py-3 text-muted-foreground">
+                      {e.subject}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-muted-foreground">
+                      {formatDate(e.sentDate)}
+                    </td>
+                    <td className="px-3 py-3">
+                      <StatusBadge status={e.status} />
+                    </td>
                     <td className="px-3 py-3 text-center">
                       <span className="inline-flex items-center gap-1 text-muted-foreground">
                         <Eye className="h-3.5 w-3.5" /> {e.opens}
@@ -214,13 +256,29 @@ function EmailHistoryPage() {
 
         {/* Pagination */}
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Showing {rows.length} of {total} emails</p>
+          <p className="text-sm text-muted-foreground">
+            Showing {rows.length} of {total} emails
+          </p>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 rounded-lg"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-sm font-medium">{page} / {totalPages}</span>
-            <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+            <span className="text-sm font-medium">
+              {page} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 rounded-lg"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

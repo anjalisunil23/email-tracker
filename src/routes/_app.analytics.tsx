@@ -1,9 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { onTrackingEvent } from "@/services/socketClient";
 import { createFileRoute } from "@tanstack/react-router";
 import { Eye, MousePointerClick, TrendingUp, Mail, Send, Percent, Activity } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { TrendAreaChart, OpensBarChart, ClicksLineChart, DevicePieChart } from "@/components/dashboard/Charts";
+import {
+  TrendAreaChart,
+  OpensBarChart,
+  ClicksLineChart,
+  DevicePieChart,
+} from "@/components/dashboard/Charts";
 import {
   getDashboardStats,
   getTimeseries,
@@ -36,7 +42,7 @@ function AnalyticsPage() {
   const [topEmails, setTopEmails] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadAnalytics = useCallback(() => {
     Promise.all([
       getDashboardStats(),
       getTimeseries(),
@@ -54,6 +60,12 @@ function AnalyticsPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadAnalytics();
+    const unsub = onTrackingEvent(() => loadAnalytics());
+    return unsub;
+  }, [loadAnalytics]);
 
   return (
     <div className="space-y-6">
@@ -127,7 +139,10 @@ function AnalyticsPage() {
               ) : (
                 <div className="space-y-3">
                   {topEmails.map((e, i) => (
-                    <div key={i} className="flex items-center gap-3 rounded-xl border bg-background p-3">
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 rounded-xl border bg-background p-3"
+                    >
                       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-primary text-sm font-bold text-white">
                         {i + 1}
                       </span>
@@ -152,14 +167,25 @@ function AnalyticsPage() {
               ) : (
                 <div className="space-y-2">
                   {recentActivity.map((ev) => (
-                    <div key={ev.id} className="flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/50">
+                    <div
+                      key={ev.id}
+                      className="flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/50"
+                    >
                       <div className="flex items-center gap-3">
-                        <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${ev.type === "click" ? "bg-success/15 text-success" : "bg-chart-2/15 text-chart-2"}`}>
-                          {ev.type === "click" ? <MousePointerClick className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span
+                          className={`flex h-8 w-8 items-center justify-center rounded-lg ${ev.type === "click" ? "bg-success/15 text-success" : "bg-chart-2/15 text-chart-2"}`}
+                        >
+                          {ev.type === "click" ? (
+                            <MousePointerClick className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </span>
                         <div>
                           <p className="text-sm font-medium text-foreground">{ev.label}</p>
-                          <p className="text-xs text-muted-foreground">{ev.location} · {ev.device}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {ev.location} · {ev.device}
+                          </p>
                         </div>
                       </div>
                       <span className="text-xs text-muted-foreground">{formatDate(ev.time)}</span>

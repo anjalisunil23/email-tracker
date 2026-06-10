@@ -17,3 +17,7 @@ export const listEmails = (params?: {
 }) => api.get("/email", { params });
 
 export const getEmail = (id: string) => api.get(`/email/${id}`);
+
+export const getScheduledEmails = () => api.get("/email/scheduled");
+
+export const cancelScheduledEmail = (id: string) => api.delete(`/email/scheduled/${id}`);

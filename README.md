@@ -13,6 +13,7 @@ A modern, full-stack email tracking application that monitors email opens, link 
 ## 🎯 Features
 
 ### Core Functionality
+
 - ✉️ **Email Tracking** - Track email opens with pixel-based tracking
 - 🔗 **Link Click Tracking** - Monitor which links recipients click
 - 📊 **Real-time Analytics** - View open rates, click rates, and engagement metrics
@@ -20,6 +21,7 @@ A modern, full-stack email tracking application that monitors email opens, link 
 - 🔐 **JWT Authentication** - Token-based secure API access
 
 ### Analytics Dashboard
+
 - 📈 Email performance metrics
 - 🌍 Geographic and device tracking
 - 📱 Device/Browser breakdown
@@ -27,6 +29,7 @@ A modern, full-stack email tracking application that monitors email opens, link 
 - 🔍 Individual email detailed analytics
 
 ### Technical Features
+
 - **TypeScript** - Full type safety across frontend and backend
 - **Real-time Updates** - React Query for efficient data fetching
 - **Responsive UI** - Mobile-friendly design with Tailwind CSS
@@ -38,6 +41,7 @@ A modern, full-stack email tracking application that monitors email opens, link 
 ## 📋 Tech Stack
 
 ### Frontend
+
 - **React 19.2** - UI framework
 - **TanStack Router 1.168** - Routing and navigation
 - **TanStack Query 5.83** - Server state management
@@ -48,6 +52,7 @@ A modern, full-stack email tracking application that monitors email opens, link 
 - **React Hook Form** - Form management
 
 ### Backend
+
 - **Express.js 4.18** - Web framework
 - **Node.js 18+** - Runtime
 - **MongoDB 6.0+** - NoSQL database
@@ -59,6 +64,7 @@ A modern, full-stack email tracking application that monitors email opens, link 
 - **CORS** - Cross-origin support
 
 ### Development Tools
+
 - **TypeScript** - Type checking
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
@@ -70,6 +76,7 @@ A modern, full-stack email tracking application that monitors email opens, link 
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 16.0.0+
 - npm 7.0.0+
 - MongoDB 4.4+ (optional - in-memory option available)
@@ -77,24 +84,30 @@ A modern, full-stack email tracking application that monitors email opens, link 
 ### Installation
 
 1. **Clone Repository**
+
    ```bash
    git clone <repository-url>
    cd zenith-mail-lab
    ```
 
 2. **Install Dependencies**
+
    ```bash
    npm install
    cd backend && npm install && cd ..
    ```
 
 3. **Configure Environment**
+
    ```bash
-   # Create backend/.env
+   # Linux/macOS:
    cp backend/.env.example backend/.env
+   # Windows (PowerShell):
+   copy backend\.env.example backend\.env
    ```
 
 4. **Update `.env` file**
+
    ```env
    MONGO_URI=mongodb://127.0.0.1:27017/mailtracker
    USE_MEMORY_DB=true
@@ -106,14 +119,16 @@ A modern, full-stack email tracking application that monitors email opens, link 
    ```
 
 5. **Start Development Servers**
-   
+
    **Terminal 1 - Backend:**
+
    ```bash
    cd backend
    npm run dev
    ```
-   
+
    **Terminal 2 - Frontend:**
+
    ```bash
    npm run dev
    ```
@@ -136,12 +151,14 @@ A modern, full-stack email tracking application that monitors email opens, link 
 ## 🔌 API Endpoints
 
 ### Authentication
+
 ```
 POST   /api/auth/register     Register new user
 POST   /api/auth/login        User login
 ```
 
 ### Email Management
+
 ```
 POST   /api/email/send        Send tracked email
 GET    /api/email/list        Get user's emails
@@ -149,12 +166,14 @@ GET    /api/email/:id         Get email details
 ```
 
 ### Tracking
+
 ```
 POST   /api/track/open/:id    Record email open
 POST   /api/track/click/:id   Record link click
 ```
 
 ### Analytics
+
 ```
 GET    /api/analytics/summary  Overall analytics
 GET    /api/analytics/emails   Email-level metrics
@@ -168,21 +187,25 @@ GET    /api/analytics/events   Event details
 ### Collections
 
 **Users**
+
 - User account information
 - Authentication credentials
 - Account metadata
 
 **Emails**
+
 - Email metadata
 - Tracking IDs
 - Recipient information
 
 **Open Events**
+
 - Email open records
 - Device/browser information
 - IP addresses and timestamps
 
 **Click Events**
+
 - Link click records
 - Clicked URLs
 - Device/browser information
@@ -238,6 +261,7 @@ zenith-mail-lab/
 - **Rate limiting** on API endpoints
 
 ### Usage
+
 ```
 Authorization: Bearer <jwt-token>
 ```
@@ -247,12 +271,14 @@ Authorization: Bearer <jwt-token>
 ## 📈 Analytics Features
 
 ### Email Analytics
+
 - **Open Rate** - Percentage of recipients who opened
 - **Click Rate** - Percentage of recipients who clicked
 - **Unique Opens** - Deduplicated open count
 - **Device Breakdown** - Desktop/Mobile/Tablet stats
 
 ### Recipient Tracking
+
 - **Open History** - Timestamp and frequency
 - **Click History** - URLs and timestamps
 - **Device Info** - Device type, browser, OS
@@ -290,11 +316,13 @@ npm run build:dev       # Development build
 - **TypeScript** - Static type checking
 
 Run linter:
+
 ```bash
 npm run lint
 ```
 
 Format code:
+
 ```bash
 npm run format
 ```
@@ -304,6 +332,7 @@ npm run format
 ## 🚀 Deployment
 
 ### Frontend Deployment
+
 ```bash
 npm run build
 # Deploy 'dist' folder to:
@@ -314,6 +343,7 @@ npm run build
 ```
 
 ### Backend Deployment
+
 ```bash
 cd backend
 npm run build
@@ -332,6 +362,7 @@ See [INSTALLATION_GUIDE.md](./INSTALLATION_GUIDE.md#production-deployment) for d
 ## 🐛 Troubleshooting
 
 ### MongoDB Connection Issues
+
 ```bash
 # Check if MongoDB is running
 # Windows: Get-Service MongoDB
@@ -343,6 +374,7 @@ USE_MEMORY_DB=true
 ```
 
 ### Port Already in Use
+
 ```bash
 # Find process on port
 # Windows: netstat -ano | findstr :5000
@@ -354,6 +386,7 @@ USE_MEMORY_DB=true
 ```
 
 ### Authentication Issues
+
 - Ensure `JWT_SECRET` is set in `.env`
 - Check token expiration
 - Verify Authorization header format
@@ -365,6 +398,7 @@ See [INSTALLATION_GUIDE.md](./INSTALLATION_GUIDE.md#troubleshooting) for more so
 ## 📝 Example Usage
 
 ### Register User
+
 ```bash
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
@@ -376,6 +410,7 @@ curl -X POST http://localhost:5000/api/auth/register \
 ```
 
 ### Login
+
 ```bash
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -386,6 +421,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 ```
 
 ### Send Email
+
 ```bash
 curl -X POST http://localhost:5000/api/email/send \
   -H "Content-Type: application/json" \
@@ -408,6 +444,7 @@ curl -X POST http://localhost:5000/api/email/send \
 5. Open Pull Request
 
 ### Code Style
+
 - Use TypeScript for all code
 - Follow ESLint rules
 - Run Prettier before committing
@@ -424,6 +461,7 @@ This project is licensed under the **ISC License** - see LICENSE file for detail
 ## 🆘 Support
 
 For help and support:
+
 1. Check [INSTALLATION_GUIDE.md](./INSTALLATION_GUIDE.md)
 2. Review [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)
 3. Open an issue on GitHub
@@ -464,6 +502,7 @@ For help and support:
 ## 📞 Contact
 
 For questions or feedback:
+
 - Create an issue on GitHub
 - Check project documentation
 - Review code comments

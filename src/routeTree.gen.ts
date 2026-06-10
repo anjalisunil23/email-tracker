@@ -9,17 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppTemplatesRouteImport } from './routes/_app.templates'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppSendEmailRouteImport } from './routes/_app.send-email'
+import { Route as AppScheduledRouteImport } from './routes/_app.scheduled'
 import { Route as AppEmailHistoryRouteImport } from './routes/_app.email-history'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppContactsRouteImport } from './routes/_app.contacts'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 import { Route as AppEmailHistoryIdRouteImport } from './routes/_app.email-history.$id'
 
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -42,6 +49,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
 const AppSendEmailRoute = AppSendEmailRouteImport.update({
   id: '/send-email',
   path: '/send-email',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppScheduledRoute = AppScheduledRouteImport.update({
+  id: '/scheduled',
+  path: '/scheduled',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEmailHistoryRoute = AppEmailHistoryRouteImport.update({
@@ -72,10 +84,12 @@ const AppEmailHistoryIdRoute = AppEmailHistoryIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/register': typeof RegisterRoute
   '/analytics': typeof AppAnalyticsRoute
   '/contacts': typeof AppContactsRoute
   '/dashboard': typeof AppDashboardRoute
   '/email-history': typeof AppEmailHistoryRouteWithChildren
+  '/scheduled': typeof AppScheduledRoute
   '/send-email': typeof AppSendEmailRoute
   '/settings': typeof AppSettingsRoute
   '/templates': typeof AppTemplatesRoute
@@ -83,10 +97,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/register': typeof RegisterRoute
   '/analytics': typeof AppAnalyticsRoute
   '/contacts': typeof AppContactsRoute
   '/dashboard': typeof AppDashboardRoute
   '/email-history': typeof AppEmailHistoryRouteWithChildren
+  '/scheduled': typeof AppScheduledRoute
   '/send-email': typeof AppSendEmailRoute
   '/settings': typeof AppSettingsRoute
   '/templates': typeof AppTemplatesRoute
@@ -96,10 +112,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/register': typeof RegisterRoute
   '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/contacts': typeof AppContactsRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/email-history': typeof AppEmailHistoryRouteWithChildren
+  '/_app/scheduled': typeof AppScheduledRoute
   '/_app/send-email': typeof AppSendEmailRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/templates': typeof AppTemplatesRoute
@@ -109,10 +127,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/register'
     | '/analytics'
     | '/contacts'
     | '/dashboard'
     | '/email-history'
+    | '/scheduled'
     | '/send-email'
     | '/settings'
     | '/templates'
@@ -120,10 +140,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/register'
     | '/analytics'
     | '/contacts'
     | '/dashboard'
     | '/email-history'
+    | '/scheduled'
     | '/send-email'
     | '/settings'
     | '/templates'
@@ -132,10 +154,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/register'
     | '/_app/analytics'
     | '/_app/contacts'
     | '/_app/dashboard'
     | '/_app/email-history'
+    | '/_app/scheduled'
     | '/_app/send-email'
     | '/_app/settings'
     | '/_app/templates'
@@ -145,10 +169,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  RegisterRoute: typeof RegisterRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -182,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/send-email'
       fullPath: '/send-email'
       preLoaderRoute: typeof AppSendEmailRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/scheduled': {
+      id: '/_app/scheduled'
+      path: '/scheduled'
+      fullPath: '/scheduled'
+      preLoaderRoute: typeof AppScheduledRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/email-history': {
@@ -239,6 +278,7 @@ interface AppRouteChildren {
   AppContactsRoute: typeof AppContactsRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppEmailHistoryRoute: typeof AppEmailHistoryRouteWithChildren
+  AppScheduledRoute: typeof AppScheduledRoute
   AppSendEmailRoute: typeof AppSendEmailRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppTemplatesRoute: typeof AppTemplatesRoute
@@ -249,6 +289,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppContactsRoute: AppContactsRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppEmailHistoryRoute: AppEmailHistoryRouteWithChildren,
+  AppScheduledRoute: AppScheduledRoute,
   AppSendEmailRoute: AppSendEmailRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppTemplatesRoute: AppTemplatesRoute,
@@ -259,6 +300,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

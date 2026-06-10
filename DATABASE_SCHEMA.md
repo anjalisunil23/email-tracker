@@ -1,16 +1,19 @@
 # Mail Tracker - Database Schema Documentation
 
 ## Overview
+
 The Mail Tracker application uses **MongoDB** with **Mongoose** ORM as its database layer. The database stores user accounts, email tracking data, and engagement metrics (opens and clicks).
 
 ## Database Collections
 
 ### 1. Users Collection
+
 Stores user account information for authentication and authorization.
 
 **Collection Name:** `users`
 
 **Schema:**
+
 ```javascript
 {
   _id: ObjectId,
@@ -22,6 +25,7 @@ Stores user account information for authentication and authorization.
 ```
 
 **Fields:**
+
 - `_id`: Unique MongoDB ObjectId
 - `name`: User's full name
 - `email`: User's email address (unique index)
@@ -29,17 +33,20 @@ Stores user account information for authentication and authorization.
 - `createdAt`: Account creation timestamp
 
 **Indexes:**
+
 - `email` (unique)
 - `createdAt`
 
 ---
 
 ### 2. Emails Collection
+
 Stores metadata about emails sent through the tracking system.
 
 **Collection Name:** `emails`
 
 **Schema:**
+
 ```javascript
 {
   _id: ObjectId,
@@ -53,6 +60,7 @@ Stores metadata about emails sent through the tracking system.
 ```
 
 **Fields:**
+
 - `_id`: Unique MongoDB ObjectId
 - `userId`: Reference to the User who sent the email
 - `recipient`: Recipient's email address
@@ -62,6 +70,7 @@ Stores metadata about emails sent through the tracking system.
 - `sentAt`: Timestamp when email was sent
 
 **Indexes:**
+
 - `trackingId` (unique)
 - `userId`
 - `sentAt`
@@ -69,11 +78,13 @@ Stores metadata about emails sent through the tracking system.
 ---
 
 ### 3. Open Events Collection
+
 Records when and how emails were opened by recipients.
 
 **Collection Name:** `openevents`
 
 **Schema:**
+
 ```javascript
 {
   _id: ObjectId,
@@ -88,6 +99,7 @@ Records when and how emails were opened by recipients.
 ```
 
 **Fields:**
+
 - `_id`: Unique MongoDB ObjectId
 - `emailId`: Reference to the Email document
 - `openedAt`: Timestamp when email was opened
@@ -98,17 +110,20 @@ Records when and how emails were opened by recipients.
 - `operatingSystem`: OS name (Windows, MacOS, Linux, iOS, Android)
 
 **Indexes:**
+
 - `emailId`
 - `openedAt`
 
 ---
 
 ### 4. Click Events Collection
+
 Records when recipients click on links within tracked emails.
 
 **Collection Name:** `clickevents`
 
 **Schema:**
+
 ```javascript
 {
   _id: ObjectId,
@@ -124,6 +139,7 @@ Records when recipients click on links within tracked emails.
 ```
 
 **Fields:**
+
 - `_id`: Unique MongoDB ObjectId
 - `emailId`: Reference to the Email document
 - `clickedAt`: Timestamp when link was clicked
@@ -135,6 +151,7 @@ Records when recipients click on links within tracked emails.
 - `operatingSystem`: OS name
 
 **Indexes:**
+
 - `emailId`
 - `clickedAt`
 
@@ -180,51 +197,59 @@ Email (1) ──── (N) ClickEvent
 ## Analytics Aggregations
 
 ### Total Opens by Email
+
 ```javascript
 db.openevents.aggregate([
   { $match: { emailId: ObjectId } },
-  { $group: { _id: "$emailId", total: { $sum: 1 } } }
-])
+  { $group: { _id: "$emailId", total: { $sum: 1 } } },
+]);
 ```
 
 ### Unique Opens (by IP)
+
 ```javascript
 db.openevents.aggregate([
   { $match: { emailId: ObjectId } },
   { $group: { _id: { emailId: "$emailId", ip: "$ipAddress" } } },
-  { $count: "uniqueOpens" }
-])
+  { $count: "uniqueOpens" },
+]);
 ```
 
 ### Opens by Device Type
+
 ```javascript
 db.openevents.aggregate([
   { $match: { emailId: ObjectId } },
-  { $group: { _id: "$deviceType", count: { $sum: 1 } } }
-])
+  { $group: { _id: "$deviceType", count: { $sum: 1 } } },
+]);
 ```
 
 ### Click Through Rate
+
 ```javascript
 db.emails.aggregate([
   { $match: { userId: ObjectId } },
   { $lookup: { from: "clickevents", localField: "_id", foreignField: "emailId", as: "clicks" } },
   { $lookup: { from: "openevents", localField: "_id", foreignField: "emailId", as: "opens" } },
-  { $group: {
-    _id: null,
-    totalEmails: { $sum: 1 },
-    totalOpens: { $sum: { $size: "$opens" } },
-    totalClicks: { $sum: { $size: "$clicks" } }
-  }},
-  { $project: {
-    _id: 0,
-    totalEmails: 1,
-    totalOpens: 1,
-    totalClicks: 1,
-    openRate: { $divide: [{ $multiply: ["$totalOpens", 100] }, "$totalEmails"] },
-    clickRate: { $divide: [{ $multiply: ["$totalClicks", 100] }, "$totalEmails"] }
-  }}
-])
+  {
+    $group: {
+      _id: null,
+      totalEmails: { $sum: 1 },
+      totalOpens: { $sum: { $size: "$opens" } },
+      totalClicks: { $sum: { $size: "$clicks" } },
+    },
+  },
+  {
+    $project: {
+      _id: 0,
+      totalEmails: 1,
+      totalOpens: 1,
+      totalClicks: 1,
+      openRate: { $divide: [{ $multiply: ["$totalOpens", 100] }, "$totalEmails"] },
+      clickRate: { $divide: [{ $multiply: ["$totalClicks", 100] }, "$totalEmails"] },
+    },
+  },
+]);
 ```
 
 ---
@@ -232,6 +257,7 @@ db.emails.aggregate([
 ## Database Configuration
 
 **Environment Variables:**
+
 ```
 MONGO_URI=mongodb://127.0.0.1:27017/mailtracker
 USE_MEMORY_DB=true  # Set to false for production MongoDB

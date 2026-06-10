@@ -19,9 +19,15 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Sign In — MailTrack" },
-      { name: "description", content: "Sign in to MailTrack to track email opens, clicks, and engagement analytics." },
+      {
+        name: "description",
+        content: "Sign in to MailTrack to track email opens, clicks, and engagement analytics.",
+      },
       { property: "og:title", content: "Sign In — MailTrack" },
-      { property: "og:description", content: "Sign in to MailTrack to track email opens, clicks, and engagement analytics." },
+      {
+        property: "og:description",
+        content: "Sign in to MailTrack to track email opens, clicks, and engagement analytics.",
+      },
     ],
   }),
   component: LoginPage,
@@ -37,6 +43,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +51,7 @@ function LoginPage() {
     try {
       const email = (e.target as any).email.value;
       const password = (e.target as any).password.value;
-      const res = await login({ email, password });
+      const res = await login({ email, password, rememberMe });
       setToken(res.data.token);
       toast.success("Welcome back!");
       navigate({ to: "/dashboard" });
@@ -158,20 +165,33 @@ function LoginPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Checkbox id="remember" defaultChecked />
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                onCheckedChange={(v) => setRememberMe(v === true)}
+              />
               <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground">
                 Remember me for 30 days
               </Label>
             </div>
 
-            <Button type="submit" disabled={loading} className="btn-primary-gradient h-11 w-full text-base">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="btn-primary-gradient h-11 w-full text-base"
+            >
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <span className="text-muted-foreground">Use demo: anjali@mailtrack.io / password</span>
+            <Link to="/register" className="font-medium text-primary hover:underline">
+              Create one
+            </Link>
+          </p>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Demo: anjali@mailtrack.io / password
           </p>
         </div>
       </div>

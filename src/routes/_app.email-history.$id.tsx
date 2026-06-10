@@ -35,8 +35,7 @@ function NotFound() {
   );
 }
 
-const deviceIcon = (d: string) =>
-  d === "Mobile" ? Smartphone : d === "Tablet" ? Tablet : Monitor;
+const deviceIcon = (d: string) => (d === "Mobile" ? Smartphone : d === "Tablet" ? Tablet : Monitor);
 
 function EmailDetailsPage() {
   const { id } = Route.useParams();
@@ -113,11 +112,15 @@ function EmailDetailsPage() {
             </div>
             <div>
               <dt className="mb-1 text-muted-foreground">Status</dt>
-              <dd><StatusBadge status={email.status} /></dd>
+              <dd>
+                <StatusBadge status={email.status} />
+              </dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Preview</dt>
-              <dd className="mt-1 rounded-lg bg-muted/60 p-3 text-foreground/80">{email.preview}</dd>
+              <dd className="mt-1 rounded-lg bg-muted/60 p-3 text-foreground/80">
+                {email.preview}
+              </dd>
             </div>
           </dl>
         </Card>
@@ -146,7 +149,14 @@ function Timeline({
   events,
   accent,
 }: {
-  events: Array<{ id: string; label: string; time: string; location: string; device: string; browser: string }>;
+  events: Array<{
+    id: string;
+    label: string;
+    time: string;
+    location: string;
+    device: string;
+    browser: string;
+  }>;
   accent: string;
 }) {
   if (events.length === 0) {
@@ -159,7 +169,9 @@ function Timeline({
         return (
           <li key={ev.id} className="relative flex gap-4 pl-2">
             <div className="flex flex-col items-center">
-              <span className={`flex h-8 w-8 items-center justify-center rounded-full bg-muted ${accent}`}>
+              <span
+                className={`flex h-8 w-8 items-center justify-center rounded-full bg-muted ${accent}`}
+              >
                 <Clock className="h-4 w-4" />
               </span>
               {i < events.length - 1 && <span className="mt-1 w-px flex-1 bg-border" />}

@@ -42,7 +42,13 @@ const defaultDevices = [
   { name: "Tablet", value: 0, color: "var(--color-chart-3)" },
 ];
 
-type ChartPoint = { name: string; opens?: number; clicks?: number; openRate?: number; clickRate?: number };
+type ChartPoint = {
+  name: string;
+  opens?: number;
+  clicks?: number;
+  openRate?: number;
+  clickRate?: number;
+};
 type DevicePoint = { name: string; value: number; color: string };
 
 export function OpensBarChart({ data = emptyWeek }: { data?: ChartPoint[] }) {
@@ -58,7 +64,10 @@ export function OpensBarChart({ data = emptyWeek }: { data?: ChartPoint[] }) {
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
         <XAxis dataKey="name" tickLine={false} axisLine={false} tick={axisStyle} />
         <YAxis tickLine={false} axisLine={false} tick={axisStyle} width={32} />
-        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--color-muted)", opacity: 0.4 }} />
+        <Tooltip
+          contentStyle={tooltipStyle}
+          cursor={{ fill: "var(--color-muted)", opacity: 0.4 }}
+        />
         <Bar dataKey="opens" fill="url(#opensGrad)" radius={[8, 8, 0, 0]} maxBarSize={42} />
       </BarChart>
     </ResponsiveContainer>
@@ -110,8 +119,22 @@ export function TrendAreaChart({ data = emptyWeek }: { data?: ChartPoint[] }) {
         <XAxis dataKey="name" tickLine={false} axisLine={false} tick={axisStyle} />
         <YAxis tickLine={false} axisLine={false} tick={axisStyle} width={32} />
         <Tooltip contentStyle={tooltipStyle} />
-        <Area type="monotone" dataKey="openRate" stroke="var(--color-chart-1)" strokeWidth={2.5} fill="url(#openArea)" name="Opens" />
-        <Area type="monotone" dataKey="clickRate" stroke="var(--color-chart-3)" strokeWidth={2.5} fill="url(#clickArea)" name="Clicks" />
+        <Area
+          type="monotone"
+          dataKey="openRate"
+          stroke="var(--color-chart-1)"
+          strokeWidth={2.5}
+          fill="url(#openArea)"
+          name="Opens"
+        />
+        <Area
+          type="monotone"
+          dataKey="clickRate"
+          stroke="var(--color-chart-3)"
+          strokeWidth={2.5}
+          fill="url(#clickArea)"
+          name="Clicks"
+        />
       </AreaChart>
     </ResponsiveContainer>
   );

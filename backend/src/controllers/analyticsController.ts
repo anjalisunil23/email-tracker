@@ -1,15 +1,15 @@
-import { Response } from 'express';
-import Email from '../models/Email';
-import OpenEvent from '../models/OpenEvent';
-import ClickEvent from '../models/ClickEvent';
-import { deriveStatus } from '../utils/emailHelpers';
-import config from '../config';
+import { Response } from "express";
+import Email from "../models/Email";
+import OpenEvent from "../models/OpenEvent";
+import ClickEvent from "../models/ClickEvent";
+import { resolveEmailStatus } from "../utils/emailHelpers";
+import config from "../config";
 
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DEVICE_COLORS: Record<string, string> = {
-  Desktop: 'var(--color-chart-1)',
-  Mobile: 'var(--color-chart-2)',
-  Tablet: 'var(--color-chart-3)',
+  Desktop: "var(--color-chart-1)",
+  Mobile: "var(--color-chart-2)",
+  Tablet: "var(--color-chart-3)",
 };
 
 async function getUserEmailIds(userId: string) {
@@ -40,7 +40,7 @@ export const getSummary = async (req: any, res: Response) => {
     });
   } catch (err: any) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 };
 
@@ -59,22 +59,57 @@ export const getDashboardStats = async (req: any, res: Response) => {
     const clickRate = totalOpens > 0 ? (totalClicks / totalOpens) * 100 : 0;
 
     res.json([
-      { key: 'sent', label: 'Total Emails Sent', value: String(totalEmailsSent), delta: '', trend: 'up', icon: 'send' },
-      { key: 'opens', label: 'Total Opens', value: String(totalOpens), delta: '', trend: 'up', icon: 'eye' },
-      { key: 'clicks', label: 'Total Clicks', value: String(totalClicks), delta: '', trend: 'up', icon: 'mouse' },
-      { key: 'openRate', label: 'Open Rate', value: `${openRate.toFixed(1)}%`, delta: '', trend: 'up', icon: 'percent' },
-      { key: 'clickRate', label: 'Click Rate', value: `${clickRate.toFixed(1)}%`, delta: '', trend: 'up', icon: 'activity' },
+      {
+        key: "sent",
+        label: "Total Emails Sent",
+        value: String(totalEmailsSent),
+        delta: "",
+        trend: "up",
+        icon: "send",
+      },
+      {
+        key: "opens",
+        label: "Total Opens",
+        value: String(totalOpens),
+        delta: "",
+        trend: "up",
+        icon: "eye",
+      },
+      {
+        key: "clicks",
+        label: "Total Clicks",
+        value: String(totalClicks),
+        delta: "",
+        trend: "up",
+        icon: "mouse",
+      },
+      {
+        key: "openRate",
+        label: "Open Rate",
+        value: `${openRate.toFixed(1)}%`,
+        delta: "",
+        trend: "up",
+        icon: "percent",
+      },
+      {
+        key: "clickRate",
+        label: "Click Rate",
+        value: `${clickRate.toFixed(1)}%`,
+        delta: "",
+        trend: "up",
+        icon: "activity",
+      },
     ]);
   } catch (err: any) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 };
 
 export const getEmailAnalytics = async (req: any, res: Response) => {
   try {
     const email = await Email.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!email) return res.status(404).json({ msg: 'Email not found' });
+    if (!email) return res.status(404).json({ msg: "Email not found" });
 
     const [openHistory, clickHistory, opens, clicks] = await Promise.all([
       OpenEvent.find({ emailId: email._id }).sort({ openedAt: -1 }),
@@ -90,10 +125,11 @@ export const getEmailAnalytics = async (req: any, res: Response) => {
       email: {
         id: email._id.toString(),
         recipient: email.recipient,
-        recipientName: email.recipient.split('@')[0].replace(/[._]/g, ' '),
+        recipientName: email.recipient.split("@")[0].replace(/[._]/g, " "),
         subject: email.subject,
         sentDate: email.sentAt,
-        status: deriveStatus(opens, clicks),
+        status: resolveEmailStatus(email.status, opens, clicks),
+        deliveryStatus: email.status,
         opens,
         clicks,
         preview: email.content.slice(0, 200),
@@ -101,21 +137,21 @@ export const getEmailAnalytics = async (req: any, res: Response) => {
       },
       openHistory: openHistory.map((e) => ({
         id: e._id.toString(),
-        type: 'open' as const,
-        label: 'Opened email',
+        type: "open" as const,
+        label: "Opened email",
         time: e.openedAt,
-        location: e.location || e.ipAddress || 'Unknown',
-        device: e.deviceType || 'Unknown',
-        browser: e.browser || 'Unknown',
+        location: e.location || e.ipAddress || "Unknown",
+        device: e.deviceType || "Unknown",
+        browser: e.browser || "Unknown",
       })),
       clickHistory: clickHistory.map((e) => ({
         id: e._id.toString(),
-        type: 'click' as const,
+        type: "click" as const,
         label: `Clicked link`,
         time: e.clickedAt,
-        location: e.location || e.ipAddress || 'Unknown',
-        device: e.deviceType || 'Unknown',
-        browser: e.browser || 'Unknown',
+        location: e.location || e.ipAddress || "Unknown",
+        device: e.deviceType || "Unknown",
+        browser: e.browser || "Unknown",
         url: e.originalUrl,
       })),
       uniqueDevices: uniqueDevices.size,
@@ -123,7 +159,7 @@ export const getEmailAnalytics = async (req: any, res: Response) => {
     });
   } catch (err: any) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 };
 
@@ -139,28 +175,35 @@ export const getTimeseries = async (req: any, res: Response) => {
       ClickEvent.find({ emailId: { $in: emailIds }, clickedAt: { $gte: since } }),
     ]);
 
-    const buckets: Record<string, { opens: number; clicks: number }> = {};
+    const buckets: Record<string, { opens: number; clicks: number; sortKey: string }> = {};
     for (let i = 0; i < 7; i++) {
       const d = new Date(since);
       d.setDate(since.getDate() + i);
-      buckets[DAY_NAMES[d.getDay()]] = { opens: 0, clicks: 0 };
+      const key = d.toISOString().slice(0, 10);
+      buckets[key] = { opens: 0, clicks: 0, sortKey: key };
     }
 
     opens.forEach((e) => {
-      const key = DAY_NAMES[new Date(e.openedAt).getDay()];
+      const key = new Date(e.openedAt).toISOString().slice(0, 10);
       if (buckets[key]) buckets[key].opens++;
     });
 
     clicks.forEach((e) => {
-      const key = DAY_NAMES[new Date(e.clickedAt).getDay()];
+      const key = new Date(e.clickedAt).toISOString().slice(0, 10);
       if (buckets[key]) buckets[key].clicks++;
     });
 
-    const data = Object.entries(buckets).map(([name, counts]) => ({ name, ...counts }));
+    const data = Object.entries(buckets)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, counts]) => ({
+        name: `${DAY_NAMES[new Date(key).getDay()]} ${new Date(key).getMonth() + 1}/${new Date(key).getDate()}`,
+        opens: counts.opens,
+        clicks: counts.clicks,
+      }));
     res.json(data);
   } catch (err: any) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 };
 
@@ -171,7 +214,7 @@ export const getDeviceBreakdown = async (req: any, res: Response) => {
     const counts: Record<string, number> = { Desktop: 0, Mobile: 0, Tablet: 0 };
 
     events.forEach((e) => {
-      const type = e.deviceType || 'Desktop';
+      const type = e.deviceType || "Desktop";
       counts[type] = (counts[type] || 0) + 1;
     });
 
@@ -179,13 +222,13 @@ export const getDeviceBreakdown = async (req: any, res: Response) => {
     const data = Object.entries(counts).map(([name, count]) => ({
       name,
       value: Math.round((count / total) * 100),
-      color: DEVICE_COLORS[name] || 'var(--color-chart-1)',
+      color: DEVICE_COLORS[name] || "var(--color-chart-1)",
     }));
 
     res.json(data);
   } catch (err: any) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 };
 
@@ -195,26 +238,30 @@ export const getRecentActivity = async (req: any, res: Response) => {
     const emailMap = new Map(emails.map((e) => [e._id.toString(), e]));
 
     const [opens, clicks] = await Promise.all([
-      OpenEvent.find({ emailId: { $in: emailIds } }).sort({ openedAt: -1 }).limit(10),
-      ClickEvent.find({ emailId: { $in: emailIds } }).sort({ clickedAt: -1 }).limit(10),
+      OpenEvent.find({ emailId: { $in: emailIds } })
+        .sort({ openedAt: -1 })
+        .limit(10),
+      ClickEvent.find({ emailId: { $in: emailIds } })
+        .sort({ clickedAt: -1 })
+        .limit(10),
     ]);
 
     const events = [
       ...opens.map((e) => ({
         id: e._id.toString(),
-        type: 'open' as const,
-        label: `Opened: ${emailMap.get(e.emailId.toString())?.subject || 'Email'}`,
+        type: "open" as const,
+        label: `Opened: ${emailMap.get(e.emailId.toString())?.subject || "Email"}`,
         time: e.openedAt,
-        location: e.location || e.ipAddress || 'Unknown',
-        device: e.deviceType || 'Unknown',
+        location: e.location || e.ipAddress || "Unknown",
+        device: e.deviceType || "Unknown",
       })),
       ...clicks.map((e) => ({
         id: e._id.toString(),
-        type: 'click' as const,
-        label: `Clicked: ${emailMap.get(e.emailId.toString())?.subject || 'Email'}`,
+        type: "click" as const,
+        label: `Clicked: ${emailMap.get(e.emailId.toString())?.subject || "Email"}`,
         time: e.clickedAt,
-        location: e.location || e.ipAddress || 'Unknown',
-        device: e.deviceType || 'Unknown',
+        location: e.location || e.ipAddress || "Unknown",
+        device: e.deviceType || "Unknown",
       })),
     ]
       .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
@@ -223,7 +270,7 @@ export const getRecentActivity = async (req: any, res: Response) => {
     res.json(events);
   } catch (err: any) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 };
 
@@ -239,7 +286,7 @@ export const getTopEmails = async (req: any, res: Response) => {
         ]);
         return {
           subject: email.subject,
-          recipient: email.recipient.split('@')[0].replace(/[._]/g, ' '),
+          recipient: email.recipient.split("@")[0].replace(/[._]/g, " "),
           opens,
           clicks,
           score: opens + clicks,
@@ -250,6 +297,6 @@ export const getTopEmails = async (req: any, res: Response) => {
     res.json(enriched.sort((a, b) => b.score - a.score).slice(0, 5));
   } catch (err: any) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 };

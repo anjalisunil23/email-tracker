@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { onTrackingEvent } from "@/services/socketClient";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Send, Eye, MousePointerClick, Percent, Activity } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -21,7 +22,13 @@ export const Route = createFileRoute("/_app/dashboard")({
   component: DashboardPage,
 });
 
-const iconMap = { send: Send, eye: Eye, mouse: MousePointerClick, percent: Percent, activity: Activity };
+const iconMap = {
+  send: Send,
+  eye: Eye,
+  mouse: MousePointerClick,
+  percent: Percent,
+  activity: Activity,
+};
 
 function DashboardPage() {
   const [stats, setStats] = useState<any[]>([]);
@@ -30,7 +37,7 @@ function DashboardPage() {
   const [recentEmails, setRecentEmails] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadDashboard = useCallback(() => {
     Promise.all([
       getDashboardStats(),
       getTimeseries(),
@@ -46,6 +53,12 @@ function DashboardPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadDashboard();
+    const unsub = onTrackingEvent(() => loadDashboard());
+    return unsub;
+  }, [loadDashboard]);
 
   return (
     <div className="space-y-6">
@@ -148,13 +161,23 @@ function DashboardPage() {
                       recentEmails.map((e) => (
                         <tr key={e.id} className="transition-colors hover:bg-muted/50">
                           <td className="py-3 pr-3">
-                            <Link to="/email-history/$id" params={{ id: e.id }} className="font-medium text-foreground hover:text-primary">
+                            <Link
+                              to="/email-history/$id"
+                              params={{ id: e.id }}
+                              className="font-medium text-foreground hover:text-primary"
+                            >
                               {e.recipientName}
                             </Link>
                           </td>
-                          <td className="max-w-[200px] truncate py-3 pr-3 text-muted-foreground">{e.subject}</td>
-                          <td className="py-3 pr-3"><StatusBadge status={e.status} /></td>
-                          <td className="py-3 text-right text-muted-foreground">{formatDate(e.sentDate)}</td>
+                          <td className="max-w-[200px] truncate py-3 pr-3 text-muted-foreground">
+                            {e.subject}
+                          </td>
+                          <td className="py-3 pr-3">
+                            <StatusBadge status={e.status} />
+                          </td>
+                          <td className="py-3 text-right text-muted-foreground">
+                            {formatDate(e.sentDate)}
+                          </td>
                         </tr>
                       ))
                     )}

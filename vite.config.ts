@@ -10,7 +10,7 @@ export default defineConfig({
   server: {
     port: 5173,
     headers: {
-      'X-Frame-Options': 'ALLOWALL',
+      "X-Frame-Options": "ALLOWALL",
     },
   },
   tanstackStart: {

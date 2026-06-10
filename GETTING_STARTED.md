@@ -30,6 +30,7 @@ cat .env
 ```
 
 **You should see:**
+
 ```
 MONGO_URI=mongodb://127.0.0.1:27017/mailtracker
 USE_MEMORY_DB=true
@@ -51,6 +52,7 @@ npm run dev
 ```
 
 **Look for this output:**
+
 ```
 ✓ Using in-memory MongoDB for local development
 ✓ MongoDB connected
@@ -73,6 +75,7 @@ npm run dev
 ```
 
 **Look for this output:**
+
 ```
 VITE v5.x.x ready in xxx ms
 
@@ -92,6 +95,7 @@ http://localhost:5173
 ```
 
 **You should see:**
+
 - Login form
 - Professional email tracking UI
 - Demo account details displayed
@@ -112,6 +116,7 @@ Password: password
 Click **Login**
 
 **You should see:**
+
 - Dashboard with analytics
 - Sample emails listed
 - Charts and metrics
@@ -123,11 +128,13 @@ Click **Login**
 ## 📊 Step 7: Explore the Dashboard (2 min)
 
 ### Dashboard Overview
+
 - **Top Stats** - Shows total emails, opens, clicks
 - **Charts** - Visual analytics
 - **Email List** - All sent emails with tracking
 
 ### Try These Actions:
+
 1. Click an email to see details
 2. View open/click events
 3. Check device and browser info
@@ -141,11 +148,11 @@ Click **Login**
 
 Now that you're up and running, read the documentation:
 
-| Document | What to Learn | Time |
-|----------|---------------|------|
-| [README.md](./README.md) | Project overview & features | 5 min |
-| [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) | How data is structured | 10 min |
-| [QUICK_START.md](./QUICK_START.md) | Quick reference & tips | 5 min |
+| Document                                         | What to Learn               | Time   |
+| ------------------------------------------------ | --------------------------- | ------ |
+| [README.md](./README.md)                         | Project overview & features | 5 min  |
+| [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)       | How data is structured      | 10 min |
+| [QUICK_START.md](./QUICK_START.md)               | Quick reference & tips      | 5 min  |
 | [INSTALLATION_GUIDE.md](./INSTALLATION_GUIDE.md) | Detailed setup & deployment | 15 min |
 
 ---
@@ -165,6 +172,7 @@ Your setup is complete when you see:
 ## 🚨 Something Not Working?
 
 ### Backend Won't Start?
+
 ```bash
 # Check Node version
 node --version  # Should be 16+
@@ -177,6 +185,7 @@ npm run dev
 ```
 
 ### Frontend Won't Load?
+
 ```bash
 # Check if port 5173 is free
 # Mac/Linux: lsof -i :5173
@@ -189,12 +198,14 @@ npm run dev
 ```
 
 ### Can't Login?
+
 - Verify backend is running (check Terminal 1)
 - Check browser console (F12) for errors
 - Try refreshing the page
 - Check `.env` file has JWT_SECRET
 
 ### Still Stuck?
+
 See [INSTALLATION_GUIDE.md - Troubleshooting](./INSTALLATION_GUIDE.md#troubleshooting)
 
 ---
@@ -202,20 +213,24 @@ See [INSTALLATION_GUIDE.md - Troubleshooting](./INSTALLATION_GUIDE.md#troublesho
 ## 💡 Pro Tips
 
 ### Keep Both Terminals Open
+
 - Terminal 1: Backend (auto-restarts on code changes)
 - Terminal 2: Frontend (auto-reloads on code changes)
 
 ### View Network Requests
+
 - Open browser DevTools (F12)
 - Click "Network" tab
 - Watch API calls as you interact
 
 ### Check Server Logs
+
 - Backend terminal shows all API requests
 - Look for errors or warnings
 - Helps with debugging
 
 ### Reset Database
+
 - Just restart the backend (in-memory DB resets)
 - All demo data will be restored
 
@@ -267,24 +282,28 @@ curl http://localhost:5000/api/auth/login
 ## 🌟 What's Included
 
 ✅ **Pre-configured Backend**
+
 - Express.js server
 - MongoDB with sample data
 - JWT authentication
 - Email tracking system
 
 ✅ **Pre-configured Frontend**
+
 - React dashboard
 - Analytics charts
 - Email management
 - Settings page
 
 ✅ **Demo Data**
+
 - 1 user account
 - 8 sample emails
 - 18 open events
 - 7 click events
 
 ✅ **Documentation**
+
 - Setup guide
 - Database schema
 - API reference
@@ -314,6 +333,7 @@ A: See [INSTALLATION_GUIDE.md - Production Deployment](./INSTALLATION_GUIDE.md#p
 ## 📊 Demo Data Included
 
 **Sample Emails (8 total):**
+
 1. Q3 Roadmap - 2 opens, 1 click
 2. Trial Question - 2 opens, 0 clicks
 3. Invoice - 0 opens, 0 clicks
@@ -346,18 +366,21 @@ A: See [INSTALLATION_GUIDE.md - Production Deployment](./INSTALLATION_GUIDE.md#p
 ## 🎊 You're Ready!
 
 ### Right Now:
+
 - ✅ All dependencies installed
 - ✅ Backend configured
 - ✅ Frontend configured
 - ✅ Demo data ready
 
 ### Next:
+
 1. Open Terminal 1 → `cd backend && npm run dev`
 2. Open Terminal 2 → `npm run dev`
 3. Visit http://localhost:5173
 4. Login with demo account
 
 ### Then:
+
 - Explore the dashboard
 - Check out the analytics
 - Read the documentation
@@ -367,13 +390,13 @@ A: See [INSTALLATION_GUIDE.md - Production Deployment](./INSTALLATION_GUIDE.md#p
 
 ## 📞 Need Help?
 
-| Issue | Solution |
-|-------|----------|
+| Issue               | Solution                                   |
+| ------------------- | ------------------------------------------ |
 | Backend won't start | Check Node version, reinstall dependencies |
-| Frontend won't load | Clear cache, check port 5173 |
-| Can't login | Check .env file, verify backend running |
-| Database errors | Use `USE_MEMORY_DB=true`, restart backend |
-| API errors | Check network tab in DevTools (F12) |
+| Frontend won't load | Clear cache, check port 5173               |
+| Can't login         | Check .env file, verify backend running    |
+| Database errors     | Use `USE_MEMORY_DB=true`, restart backend  |
+| API errors          | Check network tab in DevTools (F12)        |
 
 Full troubleshooting in [INSTALLATION_GUIDE.md](./INSTALLATION_GUIDE.md#troubleshooting)
 
@@ -381,13 +404,14 @@ Full troubleshooting in [INSTALLATION_GUIDE.md](./INSTALLATION_GUIDE.md#troubles
 
 ## 🌟 Happy Tracking!
 
-You now have a fully functional email tracking application! 
+You now have a fully functional email tracking application!
 
 **Start coding, building, and exploring!** 🚀
 
 ---
 
 ### Quick Links:
+
 - 📖 [README.md](./README.md) - Project overview
 - 🚀 [QUICK_START.md](./QUICK_START.md) - Quick reference
 - 📋 [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) - Database info
